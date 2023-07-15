@@ -1,0 +1,22 @@
+<div class="row notification-container">
+    <h2 class="text-center">My Organizations</h2>
+    
+    <div *ngFor="let org of orgs">
+        <div class="card notification-card notification-invitation">
+            <div class="card-body">
+              <table>
+                <tr>
+                  <td style="width:70%"><div class="card-title">{{org.org_name}}</div></td>
+                  <td style="width:30%">
+                    <span class="badge badge-primary" *ngIf="org.select==1">Signed In</span>
+                    <span (click)="switch(org.org_id,org.org_name)" style="cursor: pointer;" class="badge badge-success" *ngIf="org.select==0">Switch</span>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+    </div>
+   
+    
+    
+  </div>

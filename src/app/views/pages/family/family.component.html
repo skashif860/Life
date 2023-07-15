@@ -1,0 +1,74 @@
+<div class="row">
+    <div class="col-xl-12">
+      <kt-portlet [class]="'kt-portlet--height-fluid'">
+        <kt-portlet-header [title]="'Family persons'"
+          [class]="'kt-portlet__head--lg kt-portlet__head--noborder kt-portlet__head--break-sm'">
+          <ng-container ktPortletTools>
+            <!-- <kt-context-menu></kt-context-menu> -->
+            <mat-form-field>
+              <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search By CNIC">
+            </mat-form-field>
+          </ng-container>
+        </kt-portlet-header>
+        <kt-portlet-body [class]="'kt-portlet__body--fit'">
+  
+  
+          <div class="mat-elevation-z8">
+            <table mat-table [dataSource]="dataSource" matSort>
+  
+  
+              <ng-container matColumnDef="user_full_name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
+                <td mat-cell *matCellDef="let row"> {{row.user_full_name}} </td>
+              </ng-container>
+              <ng-container matColumnDef="user_name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> CNIC </th>
+                <td mat-cell *matCellDef="let row"> {{row.user_name}} </td>
+              </ng-container>
+              <ng-container matColumnDef="user_p_msisdn">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Contact </th>
+                <td mat-cell *matCellDef="let row"> {{row.user_p_msisdn}} <p *ngIf="row.user_s_msisdn != ''"  >{{row.user_s_msisdn}}</p></td>
+              </ng-container>
+              <ng-container matColumnDef="user_status">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
+                <td mat-cell *matCellDef="let row">
+                  <span *ngIf="row.user_status==1" class="badge badge-pill  badge-info">Active</span>
+                  <span  *ngIf="row.user_status==4" class="badge  badge-pill  badge-warning">Pending</span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="user_district_name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Address </th>
+                <td mat-cell *matCellDef="let row"> District:{{row.user_district_name}}
+                  <p *ngIf="row.user_taluka_name != ''">Taluka:{{row.user_taluka_name}} | UC:{{row.user_uc_name}}</p>
+                  </td>
+              </ng-container>
+              <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Action </th>
+                <td mat-cell *matCellDef="let row" >
+                  
+                  <button  *ngIf="row.user_status==4"(click)="updateStatus(row.user_id,1)" mat-icon-button color="primary" matTooltip="Approve">
+                    <mat-icon>done</mat-icon>
+                  </button>
+                  <button *ngIf="row.user_status==4"(click)="updateStatus(row.user_id,5)" mat-icon-button color="warn" type="button" matTooltip="Reject">
+                    <mat-icon>block</mat-icon>
+                  </button>
+                  <button *ngIf="row.user_status==1"(click)="updateStatus(row.user_id,5)" mat-icon-button color="warn" type="button" matTooltip="Delete">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+  
+  
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row  [@rowsAnimation]="" *matRowDef="let row; columns: displayedColumns;">
+              </tr>
+            </table>
+  
+            <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+          </div>
+  
+        </kt-portlet-body>
+      </kt-portlet>
+    </div>
+  
+  </div>

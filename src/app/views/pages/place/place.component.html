@@ -1,0 +1,180 @@
+<div class="row">
+  <div class="col-xl-6">
+    <kt-portlet [class]="'kt-portlet--height-fluid'">
+      <kt-portlet-header       [class]="'kt-portlet__head--lg kt-portlet__head--noborder kt-portlet__head--break-sm'">
+        <ng-container ktPortletTools>
+          <!-- <kt-context-menu></kt-context-menu> -->
+          <mat-form-field>
+            <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search By Title">
+          </mat-form-field>
+        </ng-container>
+      </kt-portlet-header>
+      <kt-portlet-body [class]="'kt-portlet__body--fit'">
+
+
+        <div class="mat-elevation-z8">
+          <table mat-table [dataSource]="dataSource" matSort>
+
+
+            <ng-container matColumnDef="loc_name">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Title </th>
+              <td mat-cell *matCellDef="let row"> {{row.place_name}} </td>
+            </ng-container>
+            <ng-container matColumnDef="loc_desc">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Desc </th>
+              <td mat-cell *matCellDef="let row" matTooltip={{row.place_desc}}>
+                {{(row.place_desc.length>25)? (row.place_desc | slice:0:25)+'..':(row.place_desc)}}
+              </td>
+            </ng-container>
+            <!-- <ng-container matColumnDef="loc_radius">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> radius </th>
+              <td mat-cell *matCellDef="let row"> {{row.loc_radius}}
+              </td>
+            </ng-container> -->
+            <ng-container matColumnDef="added_on">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Added On </th>
+              <td mat-cell *matCellDef="let row"> {{row.place_sdt | date: 'MMM d, y, h:mm a'}} </td>
+            </ng-container>
+            <ng-container matColumnDef="action">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Action </th>
+              <td mat-cell *matCellDef="let row">
+                <button (click)="moveMap(row)" mat-icon-button color="primary" matTooltip="Location">
+                  <mat-icon>location_on</mat-icon>
+                </button>|
+                <button (click)="openDialog(row,1)" mat-icon-button color="accent" matTooltip="Location">
+                  <mat-icon>edit</mat-icon>
+                </button>| <button (click)="deletePlace(row.place_id)" mat-icon-button color="warn" matTooltip="Location">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row [@rowsAnimation]="" *matRowDef="let row; columns: displayedColumns;">
+            </tr>
+          </table>
+
+          <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+        </div>
+        <br>
+        <button style="cursor: pointer;width: 15%;align-self: flex-end;" (click)="openDialog($event)"
+          class="btn btn-primary">Add
+        </button>
+
+      </kt-portlet-body>
+    </kt-portlet>
+  </div>
+  <div class="col-xl-6">
+    <agm-map [zoom]="15" [zoomControl]="true" [mapTypeId]="'roadmap'" style="height:65vh;"
+      [fullscreenControl]='true' [mapTypeControl]='true' [latitude]="mov_lat" [longitude]="mov_lng">
+      <!-- <agm-circle *ngIf="mov_name"
+        [latitude]="mov_lat" [longitude]="mov_lng"
+        [circleDraggable]="false"
+        [editable]="false"
+        [fillColor]="circle_color"
+        (radiusChange)="radiusChange($event)"
+        [radius]="mov_radius"
+        (dragEnd)="onChooseLoaction($event)"
+        [fillOpacity]="0.5"> -->
+      <agm-marker *ngIf="mov_name" (markerClick)="clickedMarker(infoWindow)" [latitude]="mov_lat"
+        [longitude]="mov_lng">
+        <agm-info-window [disableAutoPan]="false" #infoWindow>
+          <div class="gm-style-iw">
+            <div class="row">
+              <div style="width: 100%">
+                <div class="row">
+
+                  <div class="col-12">
+                    <div class="card-body no_pads">
+                      <p class="card-text info">
+                       <strong>{{mov_name}}</strong>.
+                       
+                      </p>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+            </div>
+
+          </div>
+        </agm-info-window>
+      </agm-marker>
+    <!-- </agm-circle> -->
+    </agm-map>
+  </div>
+</div>
+
+
+<ng-template #location>
+  <!-- <kt-portlet>
+      <kt-portlet-body [class]="'kt-portlet__body--fit'"> -->
+
+  <div class="row row-no-padding row-col-separator-xl">
+    <div class="col-xl-4">
+      <mat-form-field appearance="fill" style="width:60%;">
+        <mat-label>Name</mat-label>
+        <input matInput [(ngModel)]="place_name">
+       
+      </mat-form-field>
+      <mat-form-field appearance="fill" style="width:95%;">
+        <mat-label>Description</mat-label>
+        <textarea matInput cols="5" rows="5" [(ngModel)]="place_desc"></textarea>
+      </mat-form-field>
+      <div class="row">
+        <!-- <div class="col-xl-5">
+          <mat-form-field appearance="fill" style="width:90%;">
+            <mat-label>Radius(m)</mat-label>
+            <input type="number" matInput [(ngModel)]="radius">
+
+          </mat-form-field>
+        </div> -->
+        <div class="col-xl-12">
+          <mat-form-field appearance="fill" style="width:90%;">
+            <mat-label>Position</mat-label>
+            <input matInput placeholder="33.3333,73.3333" [(ngModel)]="position">
+          </mat-form-field>
+        </div>
+      </div>
+      <button  *ngIf="!isEdit" (click)="savePlace()" mat-button style="background-color: #716ACA;color: white;">Save</button>
+      <button *ngIf="isEdit" (click)="savePlace(true)" mat-button style="background-color: #716ACA;color: white;">Save</button>
+      
+      <div style="margin-top: 1%;" class="row">
+        <span *ngIf="field_error" class="badge badge-danger" style="background-color: red;">{{error_field}} field cannot be empty!</span>
+      </div>
+    </div>
+    <div class="col-xl-8">
+      <agm-map [zoom]="5" [zoomControl]="true" [mapTypeId]="'roadmap'" style="height:65vh;" [fullscreenControl]='false'
+        [mapTypeControl]='false' [latitude]="33.3333" [longitude]="73.3333" (mapClick)="onChooseLoaction($event)">
+        <!-- <agm-circle
+        [latitude]="lat" [longitude]="lng"
+        [circleDraggable]="true"
+        [editable]="true"
+        [fillColor]="circle_color"
+        (radiusChange)="radiusChange($event)"
+        [radius]="radius"
+        (dragEnd)="onChooseLoaction($event)"
+        [fillOpacity]="0.5"
+    > -->
+          <agm-marker [markerDraggable]="true" [latitude]="lat" [longitude]="lng" (dragEnd)="onChooseLoaction($event)">
+
+          </agm-marker>
+        <!-- </agm-circle> -->
+
+      </agm-map>
+    </div>
+   
+  </div>
+  <!-- </kt-portlet-body>
+    </kt-portlet> -->
+   
+</ng-template>
+
+
+<!-- <button (click)="openDialog($event)" class="bttn"><i class="fa fa-plus"
+    style="font-size:24px ;   position: absolute;     margin-left: -9px;   margin-top: -11px;"></i>
+</button> -->

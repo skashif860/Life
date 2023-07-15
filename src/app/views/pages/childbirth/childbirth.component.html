@@ -1,0 +1,494 @@
+<div [hidden]="!Wizard">
+  <mat-horizontal-stepper linear #stepper>
+    <mat-step [stepControl]="firstFormGroup">
+      <form [formGroup]="firstFormGroup">
+        <ng-template matStepLabel>Basic Info</ng-template>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="row">
+              <div class="col-6">
+                <mat-form-field appearance="fill" style="width:100%;">
+                  <mat-label>Title</mat-label>
+                  <input matInput placeholder="Name" [(ngModel)]="shift_name" formControlName="firstCtrl" required>
+                </mat-form-field>
+              </div>
+              <div class="col-3">
+                <mat-radio-button color="primary"  [value]="1"
+                  (change)="selection($event.value)">
+                  Normal Visit
+                </mat-radio-button>
+              </div>
+              <div class="col-3">
+                <mat-radio-button color="primary"  [value]="2"
+                  (change)="selection($event.value)">
+                  Parcel Delivery
+                </mat-radio-button>
+              </div>
+
+            </div>
+            <div class="divider"></div>
+            <div class="row">
+
+              <div class="col-md-5">
+                <mat-label>From*</mat-label>
+                <ejs-datetimepicker  (change)="onChangeStart($event)" [min]='today' format='yyyy-MM-dd HH:mm'
+                  [allowEdit]="false">
+                </ejs-datetimepicker>
+              </div>
+              <div class="col-md-2">
+
+              </div>
+              <div class="col-md-5" style="margin-left: -58px;">
+                <mat-label>To*</mat-label>
+                <ejs-datetimepicker (change)="onChangeEnd($event)" [min]='minDates' format='yyyy-MM-dd HH:mm'
+                  [allowEdit]="false">
+                </ejs-datetimepicker>
+                <div *ngIf="TimeInvalid" style="color: red;">Invalid Time!</div>
+              </div>
+            </div>
+            <br>
+
+
+
+          </div>
+          <div class="col-md-6">
+            <div class="row">
+              <mat-form-field appearance="fill" style="width: 500px;">
+                <mat-label>Description</mat-label>
+                <textarea matInput [(ngModel)]="shift_desc" placeholder="Description" cols="20" rows="10"
+                  formControlName="desc"></textarea>
+              </mat-form-field>
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <mat-form-field>
+                  <mat-label>Place</mat-label>
+                  <mat-select [formControl]="selectedplace">
+                    <mat-option>
+                      <ngx-mat-select-search noEntriesFoundLabel="'no match found'" [formControl]="placeFilterCtrl">
+                      </ngx-mat-select-search>
+                    </mat-option>
+
+                    <mat-option *ngFor="let row of place" [value]="row.place_id">
+                      {{row.place_name}}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-6">
+                <mat-form-field class="example-full-width">
+                  <mat-label>Radius(m)</mat-label>
+                  <input matInput type="number" [formControl]="selectedradius" min="50" max="5000">
+                </mat-form-field>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+
+
+        <div>
+          <button [disabled]="finalStartdate=='' || finalEnddate==''" mat-button style="background-color: #292b2c;color: white;"
+            matStepperNext>Next</button>
+        </div>
+      </form>
+    </mat-step>
+    <mat-step>
+      <form>
+        <ng-template matStepLabel>Attendees</ng-template>
+
+        <div class="row">
+          <div class="col-xl-6">
+            <kt-portlet [class]="'kt-portlet--height-fluid'">
+              <kt-portlet-header 
+                [class]="'kt-portlet__head--lg kt-portlet__head--noborder kt-portlet__head--break-sm'">
+                <ng-container ktPortletTools>
+                  <mat-form-field>
+                    <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter">
+                  </mat-form-field>
+                </ng-container>
+              </kt-portlet-header>
+              <kt-portlet-body [class]="'kt-portlet__body--fit'">
+
+
+                <div class="mat-elevation-z8">
+                  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+
+
+
+                    <!-- Name Column -->
+                    <ng-container matColumnDef="name">
+                      <th mat-header-cell *matHeaderCellDef> Name </th>
+                      <td mat-cell *matCellDef="let element"> {{element.user_name}} </td>
+                    </ng-container>
+
+                    <!-- Weight Column -->
+                    <ng-container matColumnDef="place">
+                      <th mat-header-cell *matHeaderCellDef> Phone# </th>
+                      <td mat-cell *matCellDef="let element ; let i = index">
+                        {{element.user_phone}}
+                      </td>
+                    </ng-container>
+
+                    <!-- Symbol Column -->
+                    <ng-container matColumnDef="action">
+                      &nbsp;&nbsp;
+                      <th mat-header-cell *matHeaderCellDef> Action </th>
+                      <td mat-cell *matCellDef="let element  ; let i = index">
+                        <button *ngIf="!element.applied" style="background-color:#716ACA;color: white;margin-left: 30px"
+                          mat-button color="primary" (click)="addToList(element,i)" aria-label="Assign">
+                          <mat-icon>add</mat-icon>
+                        </button>
+
+                        <button *ngIf="element.applied" style="background-color:#d14747;color: white;margin-left: 30px"
+                          mat-button color="primary" (click)="remToList(element,i)" aria-label="Assigned">
+                          <mat-icon>cancel</mat-icon>
+                        </button>
+                      </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;">
+                    </tr>
+                  </table>
+                  <mat-paginator #paginator2 [pageSize]="3"></mat-paginator>
+                </div>
+
+              </kt-portlet-body>
+            </kt-portlet>
+          </div>
+          <div class="col-xl-6">
+            <kt-portlet>
+              <kt-portlet-body [class]="'kt-portlet__body--fit'">
+                <br>
+                <h3>Filters</h3> <br> <br> <br>
+                <div class="row row-no-padding row-col-separator-xl">
+                  <div class="col-xl-12">
+                    <div class="row">
+
+                      <div class="col-xl-12">
+
+                        <mat-form-field>
+
+                          <mat-label>Department</mat-label>
+                          <mat-select (selectionChange)="filterByDept($event.value)" [formControl]="selectedDept">
+                            <mat-option>
+                              <ngx-mat-select-search noEntriesFoundLabel="'no match found'"
+                                [formControl]="deptFilterCtrl"></ngx-mat-select-search>
+                            </mat-option>
+
+                            <mat-option *ngFor="let row of dept" [value]="row.dept_id">
+                              {{row.dept_name}}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+
+                      </div>
+
+
+                    </div>
+
+
+
+
+                  </div>
+                </div>
+              </kt-portlet-body>
+            </kt-portlet>
+
+          </div>
+
+        </div>
+
+
+        <div>
+          <button mat-button style="background-color:#716ACA;color: white;" matStepperPrevious>Back</button>&nbsp;
+          <button [disabled]="attend.length==0" mat-button style="background-color: #292b2c;color: white;" matStepperNext>Next</button>
+        </div>
+      </form>
+    </mat-step>
+    <mat-step [stepControl]="secondFormGroup" [optional]="isOptional">
+      <form [formGroup]="secondFormGroup">
+        <ng-template matStepLabel>Agenda</ng-template>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="row">
+              <mat-form-field appearance="fill" style="width:100%;">
+                <mat-label>Agenda</mat-label>
+                <input matInput placeholder="Agenda" [formControl]="agenda_title">
+              </mat-form-field>
+            </div>
+            <div class="row">
+              <mat-form-field appearance="fill" style="width:100%;">
+                <mat-label>Responsible</mat-label>
+                <mat-select [formControl]="selectedattend">
+                  <mat-option>
+                    <ngx-mat-select-search placeholderLabel="Choose Responsible" noEntriesFoundLabel="'no match found'"
+                      [formControl]="attendFilterCtrl">
+                    </ngx-mat-select-search>
+                  </mat-option>
+
+                  <mat-option *ngFor="let row of attend" [value]="row.user_id">
+                    {{row.user_name}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="row">
+              <button mat-button (click)="addAgenda()" style="background-color: #716ACA;color: white;">Assign</button>
+            </div>
+            <br>
+
+
+          </div>
+          <div class="col-md-6">
+            <div class="mat-elevation-z8">
+              <table mat-table [dataSource]="dataSource3" class="mat-elevation-z8">
+
+
+                <!-- Name Column -->
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef> Name </th>
+                  <td mat-cell *matCellDef="let element"> {{element.user_name}} </td>
+                </ng-container>
+
+                <!-- Weight Column -->
+                <ng-container matColumnDef="place">
+                  <th mat-header-cell *matHeaderCellDef> Agenda </th>
+                  <td mat-cell *matCellDef="let element ; let i = index">
+                    {{element.agenda}}
+                  </td>
+                </ng-container>
+
+                <!-- Symbol Column -->
+                <ng-container matColumnDef="action">
+                  &nbsp;&nbsp;
+                  <th mat-header-cell *matHeaderCellDef> Action </th>
+                  <td mat-cell *matCellDef="let element  ; let i = index">
+                    <button style="background-color:#d14747;color: white;margin-left: 30px" mat-button color="primary"
+                      (click)="remAgenda(element,i)" aria-label="Assigned">
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;">
+                </tr>
+              </table>
+              <mat-paginator #paginator3 [pageSize]="3"></mat-paginator>
+            </div>
+          </div>
+        </div>
+
+
+
+
+        <div>
+          <button mat-button style="background-color:#716ACA;color: white;" matStepperPrevious>Back</button>&nbsp;
+          <button mat-button style="background-color: #292b2c;color: white;" matStepperNext>Next</button>
+        </div>
+      </form>
+    </mat-step>
+    <mat-step>
+      <ng-template matStepLabel>Summary</ng-template>
+      <div class="row">
+        <div class="col-md-3">
+          <mat-form-field appearance="fill" style="width:100%;">
+            <mat-label>Name</mat-label>
+            <input matInput value="{{shift_name}}" [disabled]="true">
+          </mat-form-field>
+        </div>
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+          <div class="row">
+            <strong>Visit Duration:&nbsp; </strong>&nbsp; <span class="badge badge-success">{{finalStartdate}}
+              {{finalStartTime}}</span> &nbsp;TO
+            &nbsp;<span class="badge badge-success">{{finalEnddate}} {{finalEndTime}}</span>
+          </div>
+          <br>
+
+
+          <div class="row">
+            <strong>Visit creation &nbsp; </strong> against &nbsp;<strong>{{attend.length}}</strong>
+            &nbsp;employee(s).
+          </div>
+
+          <!-- <div class="row">
+            <strong>Visit place: &nbsp; </strong> {{placeFilterCtrl.value}} with Radius of &nbsp;<strong>{{selectedradius}} m</strong>
+           </div> -->
+        </div>
+
+      </div>
+      <div class="row">
+        <div class="col-md-3">
+          <mat-form-field appearance="fill" style="width: 500px;">
+            <mat-label>Description</mat-label>
+            <textarea matInput [disabled]="true">{{shift_desc}}</textarea>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div>
+        <button mat-button style="background-color:#716ACA;color: white;" matStepperPrevious>Back</button>&nbsp;
+        <button *ngIf="!editing" mat-button style="background-color: #d9534f;color: white;"
+          (click)="stepper.reset();resetwizard();">Reset</button>&nbsp;
+        <button mat-button (click)="submitShift()" style="background-color: #28A745;color: white;">Submit</button>
+      </div>
+    </mat-step>
+  </mat-horizontal-stepper>
+</div>
+<div [hidden]="Wizard">
+
+  <div class="row">
+    <div class="col-xl-12">
+      <kt-portlet [class]="'kt-portlet--height-fluid'">
+        <kt-portlet-header [title]=""
+          [class]="'kt-portlet__head--lg kt-portlet__head--noborder kt-portlet__head--break-sm'">
+          <ng-container ktPortletTools>
+            <!-- <kt-context-menu></kt-context-menu> -->
+            <mat-form-field>
+              <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search By Name">
+            </mat-form-field>
+          </ng-container>
+        </kt-portlet-header>
+        <kt-portlet-body [class]="'kt-portlet__body--fit'">
+
+
+          <div class="mat-elevation-z8">
+            <table mat-table [dataSource]="dataSource_table" matSort>
+
+
+              <ng-container matColumnDef="shift_name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
+                <td mat-cell *matCellDef="let row"> {{row.visit_title}} </td>
+              </ng-container>
+              <ng-container matColumnDef="shift_desc">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Desc </th>
+                <td mat-cell *matCellDef="let row">{{row.visit_desc}}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="shift_start">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Start Time </th>
+                <td mat-cell *matCellDef="let row">
+                  <span class="badge badge-pill badge-primary">{{row.from_dtm}}</span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="shift_end">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> End Time </th>
+                <td mat-cell *matCellDef="let row">
+                  <span class="badge badge-pill badge-primary">{{row.to_dtm}}</span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="shift_sdt">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Created On </th>
+                <td mat-cell *matCellDef="let row"> {{row.visit_sdt | date: 'MMM d, y, h:mm a'}} </td>
+              </ng-container>
+              <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header> Action </th>
+                <td mat-cell *matCellDef="let row">
+                  <button mat-icon-button color="primary" matTooltip="Detail">
+                    <mat-icon>remove_red_eye</mat-icon>
+                  </button>
+                  |
+                  <button mat-icon-button color="accent" matTooltip="Edit">
+                    <mat-icon>edit</mat-icon>
+                  </button>| <button  mat-icon-button color="warn"
+                    matTooltip="Delete">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns_table"></tr>
+              <tr mat-row [@rowsAnimation]="" *matRowDef="let row; columns: displayedColumns_table;">
+              </tr>
+            </table>
+
+            <mat-paginator #paginator1 [pageSize]="5"></mat-paginator>
+          </div>
+
+        </kt-portlet-body>
+      </kt-portlet>
+    </div>
+
+  </div>
+  <button style="cursor: pointer;width: 7%;float: right;" (click)="switch()" class="btn btn-primary">Add
+  </button>
+</div>
+<!-- 
+<ng-template #detail>
+  <div class="row  row-col-separator-xl">
+  </div>
+  <div class="row">
+    <div class="col-xl-5">
+      <div class="row">
+        <div class="col-md-3">
+          <mat-form-field appearance="fill" style="width:100%;">
+            <mat-label>Name</mat-label>
+            <input matInput value="{{shift_name}}" [disabled]="true">
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-7">
+          <mat-form-field appearance="fill" style="width: 500px;">
+            <mat-label>Description</mat-label>
+            <textarea matInput [disabled]="true">{{shift_desc}}</textarea>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-7">
+      <kt-portlet [class]="'kt-portlet--height-fluid'">
+        <kt-portlet-header [title]="'Shift Applied On'"
+          [class]="'kt-portlet__head--lg kt-portlet__head--noborder kt-portlet__head--break-sm'">
+          <ng-container ktPortletTools>
+            <mat-form-field>
+              <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter">
+            </mat-form-field>
+          </ng-container>
+        </kt-portlet-header>
+        <kt-portlet-body [class]="'kt-portlet__body--fit'">
+
+
+          <div class="mat-elevation-z8">
+            <table mat-table [dataSource]="dataSource4" class="mat-elevation-z8">
+
+
+            
+              <ng-container matColumnDef="name_detail">
+                <th mat-header-cell *matHeaderCellDef> Name </th>
+                <td mat-cell *matCellDef="let element"> {{element.mem_name}} </td>
+              </ng-container>
+
+              
+              <ng-container matColumnDef="place_detail">
+                <th mat-header-cell *matHeaderCellDef> Place </th>
+                <td mat-cell *matCellDef="let element">
+                  {{element.loc_name}}
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="detailColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: detailColumns;">
+              </tr>
+            </table>
+            <mat-paginator #paginator4 [pageSize]="3"></mat-paginator>
+          </div>
+
+        </kt-portlet-body>
+      </kt-portlet>
+
+
+
+    </div>
+  </div>
+
+</ng-template> -->

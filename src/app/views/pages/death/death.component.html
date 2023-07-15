@@ -1,0 +1,89 @@
+<br>
+<div class="row">
+  <div class="col-xl-4">
+    <div class="row row-no-padding row-col-separator-xl">
+      <div class="col-xl-12">
+        <mat-form-field appearance="fill" style="width:60%;">
+          <mat-label>Name</mat-label>
+          <input matInput [(ngModel)]="dept_name">
+         
+        </mat-form-field>
+        <mat-form-field appearance="fill" style="width:95%;">
+          <mat-label>Description</mat-label>
+          <textarea matInput cols="5" rows="5" [(ngModel)]="dept_desc"></textarea>
+        </mat-form-field>
+        <button  *ngIf="!isEdit" (click)="saveDept()" mat-button style="background-color: #716ACA;color: white;">Save</button>
+        <button *ngIf="isEdit" (click)="saveDept(true)" mat-button style="background-color: #716ACA;color: white;">Save</button>
+        
+        <div style="margin-top: 1%;" class="row">
+          <span *ngIf="field_error" class="badge badge-danger" style="background-color: red;">{{error_field}} field cannot be empty!</span>
+        </div>
+      </div>
+      
+     
+    </div>
+  </div>
+  <div class="col-xl-8">
+    <kt-portlet [class]="'kt-portlet--height-fluid'">
+      <kt-portlet-header       [class]="'kt-portlet__head--lg kt-portlet__head--noborder kt-portlet__head--break-sm'">
+        <ng-container ktPortletTools>
+          <!-- <kt-context-menu></kt-context-menu> -->
+          <mat-form-field>
+            <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search By Title">
+          </mat-form-field>
+        </ng-container>
+      </kt-portlet-header>
+      <kt-portlet-body [class]="'kt-portlet__body--fit'">
+
+
+        <div class="mat-elevation-z8">
+          <table mat-table [dataSource]="dataSource" matSort>
+
+
+            <ng-container matColumnDef="department_name">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Title </th>
+              <td mat-cell *matCellDef="let row"> {{row.dept_name}} </td>
+            </ng-container>
+            <ng-container matColumnDef="department_desc">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Desc </th>
+              <td mat-cell *matCellDef="let row" matTooltip={{row.dept_desc}}>
+                {{(row.dept_desc.length>25)? (row.dept_desc | slice:0:25)+'..':(row.dept_desc)}}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="department_sdt">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Added On </th>
+              <td mat-cell *matCellDef="let row"> {{row.dept_sdt | date: 'MMM d, y, h:mm a'}} </td>
+            </ng-container>
+            <ng-container matColumnDef="action">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Action </th>
+              <td mat-cell *matCellDef="let row">
+                <button (click)="fillup(row,1)" mat-icon-button color="accent" matTooltip="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>| <button (click)="deleteDept(row.dept_id)" mat-icon-button color="warn" matTooltip="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row [@rowsAnimation]="" *matRowDef="let row; columns: displayedColumns;">
+            </tr>
+          </table>
+
+          <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+        </div>
+
+      </kt-portlet-body>
+    </kt-portlet>
+  </div>
+ 
+</div>
+
+
+
+
+<!-- <button (click)="openDialog($event)" class="bttn"><i class="fa fa-plus"
+    style="font-size:24px ;   position: absolute;     margin-left: -9px;   margin-top: -11px;"></i>
+</button> -->
